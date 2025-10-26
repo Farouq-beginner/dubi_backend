@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Quiz extends Model
 {
     use HasFactory;
-    
+
     // Nama tabel ini jamak (quizzes), jadi sudah sesuai standar
     protected $primaryKey = 'quiz_id';
     public $timestamps = false; // Tidak punya timestamp
+
+    protected $fillable = [
+        'course_id',
+        'module_id',
+        'title',
+        'description',
+    ];
 
     /**
      * Relasi: Satu Quiz milik satu Course

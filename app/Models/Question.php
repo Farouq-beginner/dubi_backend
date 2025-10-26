@@ -11,6 +11,8 @@ class Question extends Model
 
     protected $primaryKey = 'question_id';
     public $timestamps = false; // Tidak punya timestamp
+    protected $fillable = ['quiz_id', 'question_text', 'question_type', 'order_index'];
+
 
     /**
      * Relasi: Satu Question milik satu Quiz

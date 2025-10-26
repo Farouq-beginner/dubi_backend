@@ -81,6 +81,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/teacher/quizzes/{quiz}/questions/{question}', [TeacherQuestionController::class, 'update']); // <-- BARU
     Route::delete('/teacher/quizzes/{quiz}/questions/{question}', [TeacherQuestionController::class, 'destroy']); // <-- BARU
 
+    // 6. [BARU] Rute GET Kuis untuk Guru (menampilkan jawaban benar)
+    Route::get('/teacher/quizzes/{quiz}', [TeacherQuizController::class, 'show']);
 
     // --- RUTE KHUSUS ADMIN ---
     Route::middleware('can:is-admin')->prefix('admin')->group(function () {

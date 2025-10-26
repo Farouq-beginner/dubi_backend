@@ -9,9 +9,19 @@ class UserQuizAnswer extends Model
 {
     use HasFactory;
     
-    // Nama tabel ini jamak (user_quiz_answers), sudah sesuai standar
     protected $primaryKey = 'user_answer_id';
     public $timestamps = false; // Tidak punya timestamp
+
+    /**
+     * [PERBAIKAN] Tambahkan properti $fillable
+     * Kolom yang boleh diisi saat menggunakan create()
+     */
+    protected $fillable = [
+        'attempt_id',
+        'question_id',
+        'selected_answer_id',
+        'essay_answer', // Tambahkan ini juga, untuk nanti
+    ];
 
     /**
      * Relasi: Satu jawaban user milik satu Attempt

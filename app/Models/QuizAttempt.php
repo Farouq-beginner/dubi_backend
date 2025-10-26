@@ -9,12 +9,22 @@ class QuizAttempt extends Model
 {
     use HasFactory;
     
-    // Nama tabel ini jamak (quiz_attempts), sudah sesuai standar
     protected $primaryKey = 'attempt_id';
 
     // Mapping timestamp kustom
     public const CREATED_AT = 'started_at';
     public const UPDATED_AT = 'completed_at';
+
+    /**
+     * [PERBAIKAN] Tambahkan properti $fillable
+     * Kolom yang boleh diisi saat menggunakan create()
+     */
+    protected $fillable = [
+        'user_id',
+        'quiz_id',
+        'score',
+        'completed_at', // 'started_at' diisi otomatis oleh CREATED_AT
+    ];
 
     /**
      * Relasi: Satu Attempt milik satu User

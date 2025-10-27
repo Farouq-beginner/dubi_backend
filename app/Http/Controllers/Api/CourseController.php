@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Course; // <-- Tambahkan ini
 use App\Models\Level;  // <-- Tambahkan ini
+use App\Models\Subject; // <-- Tambahkan ini
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
@@ -16,13 +17,13 @@ class CourseController extends Controller
     {
         // 'Level $level' disebut "Route Model Binding".
         // Laravel akan otomatis mencari Level berdasarkan ID di URL.
-        
+
         try {
             // Kita cari kursus berdasarkan level_id dari Level yang ditemukan
             // Kita tidak perlu memanggil ->with('level', 'subject') lagi
             // karena kita sudah menambahkannya di properti $with di Model Course
             $courses = Course::where('level_id', $level->level_id)->get();
-            
+
             // Kembalikan data sebagai JSON
             return response()->json([
                 'success' => true,
@@ -48,5 +49,25 @@ class CourseController extends Controller
             'success' => true,
             'data' => $courseDetails
         ]);
+    }
+
+    public function getCoursesBySubject(Subject $subject)
+    {
+        try {
+            // Kita cari kursus berdasarkan subject_id
+            $courses = Course::where('subject_id', $subject->subject_id)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $courses
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

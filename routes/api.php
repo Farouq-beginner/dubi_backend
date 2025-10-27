@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\LevelController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\Api\BrowseController;
 // --- CONTROLLER GURU ---
 use App\Http\Controllers\Api\Teacher\CourseController as TeacherCourseController;
 use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController;
@@ -15,6 +16,9 @@ use App\Http\Controllers\Api\Teacher\QuestionController as TeacherQuestionContro
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
+// --- CONTROLLER SISWA ---
+use App\Http\Controllers\Api\Student\ProgressController;
+use App\Http\Controllers\Api\Student\DashboardController;
 
 
 // --- RUTE PUBLIK ---
@@ -23,6 +27,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/levels', [LevelController::class, 'index']);
 Route::get('/subjects', [SubjectController::class, 'index']);
 Route::get('/courses/level/{level}', [CourseController::class, 'getCoursesByLevel']);
+Route::get('/courses/subject/{subject}', [CourseController::class, 'getCoursesBySubject']);
+Route::get('/browse/courses', [BrowseController::class, 'getAllCoursesByLevel']);
 
 
 // --- RUTE TERPROTEKSI (Harus login via Sanctum) ---
@@ -83,6 +89,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 6. [BARU] Rute GET Kuis untuk Guru (menampilkan jawaban benar)
     Route::get('/teacher/quizzes/{quiz}', [TeacherQuizController::class, 'show']);
+
+
+    // --- [BARU] RUTE KHUSUS SISWA ---
+    Route::get('/student/dashboard', [DashboardController::class, 'getDashboard']);
+
 
     // --- RUTE KHUSUS ADMIN ---
     Route::middleware('can:is-admin')->prefix('admin')->group(function () {

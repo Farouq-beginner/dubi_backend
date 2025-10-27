@@ -1,0 +1,26 @@
+# Gunakan image PHP dengan Apache
+FROM php:8.2-apache
+
+# Install ekstensi Laravel yang dibutuhkan
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Copy semua file ke container
+COPY . /var/www/html
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install dependensi Laravel
+RUN composer install --optimize-autoloader --no-dev
+
+# Jalankan perintah Laravel
+RUN php artisan key:generate
+
+# Expose port 80 (Apache default)
+EXPOSE 80
+
+# Jalankan Apache
+CMD ["apache2-foreground"]

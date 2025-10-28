@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\BrowseController;
 use App\Http\Controllers\Api\SempoaController;
 // --- CONTROLLER GURU ---
 use App\Http\Controllers\Api\Teacher\CourseController as TeacherCourseController;
-use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController; 
+use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController;
 use App\Http\Controllers\Api\Teacher\LessonController as TeacherLessonController;
 use App\Http\Controllers\Api\Teacher\QuizController as TeacherQuizController;
 use App\Http\Controllers\Api\Teacher\QuestionController as TeacherQuestionController;
@@ -47,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- [BARU] RUTE SEMPOA ---
     Route::get('/sempoa/progress', [SempoaController::class, 'getProgress']);
     Route::post('/sempoa/progress', [SempoaController::class, 'saveProgress']);
+    // [BARU] Rute Leaderboard
+    Route::get('/sempoa/leaderboard', [SempoaController::class, 'getLeaderboard']);
 
     // --- Rute Umum & Siswa ---
     Route::get('/home/my-courses', [HomeController::class, 'myCourses']);
@@ -61,7 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/courses/{course}', [TeacherCourseController::class, 'update']);
         Route::delete('/courses/{course}', [TeacherCourseController::class, 'destroy']);
 
-        Route::post('/courses/{course}/modules', [TeacherModuleController::class, 'store']); 
+        Route::post('/courses/{course}/modules', [TeacherModuleController::class, 'store']);
         Route::put('/courses/{course}/modules/{module}', [TeacherModuleController::class, 'update']);
         Route::delete('/courses/{course}/modules/{module}', [TeacherModuleController::class, 'destroy']);
 
@@ -70,7 +72,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/modules/{module}/lessons/{lesson}', [TeacherLessonController::class, 'destroy']);
 
         Route::post('/courses/{course}/quizzes', [TeacherQuizController::class, 'store']);
-        // FIX: hapus 'teacher' yang dobel di path ini
         Route::get('/quizzes/{quiz}', [TeacherQuizController::class, 'show']);
         Route::put('/courses/{course}/quizzes/{quiz}', [TeacherQuizController::class, 'update']);
         Route::delete('/courses/{course}/quizzes/{quiz}', [TeacherQuizController::class, 'destroy']);

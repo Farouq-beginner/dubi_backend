@@ -16,7 +16,7 @@ class SempoaController extends Controller
     public function getProgress()
     {
         $user = Auth::user();
-        
+
         // Ambil data progres atau buat yang baru
         $progress = SempoaProgress::firstOrCreate(
             ['user_id' => $user->user_id],
@@ -32,7 +32,7 @@ class SempoaController extends Controller
     public function saveProgress(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'new_score' => 'required|integer|min:0',
             'new_level' => 'required|integer|min:1',
@@ -56,4 +56,20 @@ class SempoaController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Progress Sempoa tersimpan!']);
     }
+
+    /**
+     * [BARU] Mengambil 10 skor tertinggi Sempoa.
+     */
+    public function getLeaderboard()
+    {
+        $leaderboard = SempoaProgress::orderBy('high_score', 'desc')
+            ->orderBy('highest_streak', 'desc')
+            ->limit(10)
+            ->with('user') // Eager load data user (nama dan username)
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $leaderboard]);
+    }
+
+
 }

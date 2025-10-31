@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // --- RUTE PUBLIK ---
-Route::get('/check-update', [UpdateController::class, 'check']);
+Route::get('/check-update', [UpdateController::class, 'checkUpdate']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

@@ -17,7 +17,7 @@ class UpdateController extends Controller
             'latest_version' => '1.0.1',
             'latest_build' => $latestBuild,
             'update_required' => $forceUpdate,
-            'download_url' => 'https://drive.google.com/file/d/1KZsZgyZgl3RQDy4Jk-9Md3rt3IS19aN5/view?usp=sharing',
+            'download_url' => 'https://drive.google.com/drive/folders/1--6Q3oPzp7kHEWJocgfOIZzxbsMukOxo?usp=sharing',
             'changelog' => '🚀 Peningkatan performa dan fitur baru di versi ini.'
         ]);
     }

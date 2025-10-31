@@ -6,13 +6,18 @@ use Illuminate\Http\Request;
 
 class UpdateController extends Controller
 {
-    public function checkUpdate()
+    public function checkUpdate(Request $request)
     {
+        $currentBuild = $request->query('build_number', 1); // build number dari aplikasi
+        $latestBuild = 3; // build number terbaru di server
+
+        $forceUpdate = $currentBuild < $latestBuild; // wajib update kalau build lama
+
         return response()->json([
-            'latest_version' => '1.0.1', // versi terbaru
-            'build_number' => 3,
-            'download_url' => 'https://drive.google.com/uc?export=download&id=XXXX',
-            'force_update' => true, // paksa update
+            'latest_version' => '1.0.1',
+            'latest_build' => $latestBuild,
+            'update_required' => $forceUpdate,
+            'download_url' => 'https://drive.google.com/file/d/1n_wGaBtKR2IYFJAmAckarFalQ21kDQyP/view?usp=sharing',
             'changelog' => '🚀 Peningkatan performa dan fitur baru di versi ini.'
         ]);
     }

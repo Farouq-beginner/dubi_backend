@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\HomeController;
@@ -31,6 +32,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 // --- RUTE PUBLIK ---
+Route::get('/check-update', [UpdateController::class, 'check']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/levels', [LevelController::class, 'index']);

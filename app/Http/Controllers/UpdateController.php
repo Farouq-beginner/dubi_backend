@@ -9,7 +9,7 @@ class UpdateController extends Controller
     public function checkUpdate(Request $request)
     {
         $currentBuild = $request->query('build_number', 1); // build number dari aplikasi
-        $latestBuild = 4; // build number terbaru di server
+        $latestBuild = 3; // build number terbaru di server
 
         $forceUpdate = $currentBuild < $latestBuild; // wajib update kalau build lama
 

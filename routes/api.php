@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\BrowseController;
 use App\Http\Controllers\Api\SempoaController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ServerController;
 // --- CONTROLLER GURU ---
 use App\Http\Controllers\Api\Teacher\CourseController as TeacherCourseController;
 use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController;
@@ -33,18 +34,31 @@ use Illuminate\Support\Facades\Route;
 */
 
 // --- RUTE PUBLIK ---
+Route::get('/server/status', [ServerController::class, 'checkStatus']);
+
 Route::get('/check-update', [UpdateController::class, 'checkUpdate']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
 Route::get('/levels', [LevelController::class, 'index']);
 Route::get('/subjects', [SubjectController::class, 'index']);
 Route::get('/courses/level/{level}', [CourseController::class, 'getCoursesByLevel']);
 Route::get('/courses/subject/{subject}', [CourseController::class, 'getCoursesBySubject']);
 Route::get('/browse/courses', [BrowseController::class, 'getAllCoursesByLevel']);
 
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
 // ...existing code...
 Route::middleware('auth:sanctum')->group(function () {
+
+    // --- PROTECTED ---
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/server/session', [ServerController::class, 'checkSession']);
+        Route::post('/auth/logout-others', [ServerController::class, 'logoutOtherDevices']);
+        // ...
+    });
 
     Route::post('/logout', [AuthController::class, 'logout']);
 

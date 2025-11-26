@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\BrowseController;
 use App\Http\Controllers\Api\SempoaController;
+use App\Http\Controllers\Api\ProfileController;
 // --- CONTROLLER GURU ---
 use App\Http\Controllers\Api\Teacher\CourseController as TeacherCourseController;
 use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController;
@@ -46,6 +47,11 @@ Route::get('/browse/courses', [BrowseController::class, 'getAllCoursesByLevel'])
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // --- [BARU] RUTE PROFIL PENGGUNA ---
+    Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto']);
+    Route::post('/profile/send-password-code', [ProfileController::class, 'sendPasswordCode']);
+    Route::post('/profile/reset-password-with-code', [ProfileController::class, 'resetPasswordWithCode']);
 
     // --- [BARU] RUTE SEMPOA ---
     Route::get('/sempoa/progress', [SempoaController::class, 'getProgress']);

@@ -1,122 +1,80 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SendVerificationCode;
-use Illuminate\Support\Facades\Storage; // <-- Penting untuk Hapus Foto Lama
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Storage; // PENTING Untuk handle file
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
     /**
-     * 1. API Upload Foto Profil
+     * Handle Upload/Ganti Foto Profil
      */
     public function updatePhoto(Request $request)
     {
+        // 1. Validasi Input
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Maks 2MB
+            // 'photo' wajib ada, harus file gambar (jpeg,png,jpg,gif,svg), maks 2MB (2048 KB)
+            'photo' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
         ]);
 
-        $user = Auth::user();
+        // Ambil user yang sedang login
+        $user = auth()->user(); 
 
-        // Hapus foto lama jika ada
-        if ($user->profile_photo_path) {
-            Storage::disk('public')->delete($user->profile_photo_path);
-        }
+        if ($request->hasFile('photo')) {
+            // 2. Hapus Foto Lama (Jika ada)
+            // Kita cek apakah dia punya foto lama DAN file nya beneran ada di storage
+            if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
 
-        // Simpan foto baru
-        $path = $request->file('photo')->store('profile-photos', 'public');
+            // 3. Simpan Foto Baru
+            // File akan disimpan di folder 'storage/app/public/profile-photos'
+            // Laravel otomatis generate nama file unik.
+            $path = $request->file('photo')->store('profile-photos', 'public');
 
-        // Update path di database
-        $user->profile_photo_path = $path;
-        $user->save();
+            // 4. Update Database
+            // Simpan path relatifnya saja (contoh: 'profile-photos/namafileacak.jpg')
+            $user->profile_photo_path = $path;
+            $user->save();
 
-        // Kembalikan URL lengkap ke foto
-        return response()->json([
-            'success' => true,
-            'message' => 'Foto profil berhasil diunggah!',
-            'data' => [
-                'url' => Storage::disk('public')->url($path)
-            ]
-        ]);
-    }
-
-    /**
-     * 2. API Kirim Kode Verifikasi Ganti Password
-     */
-    public function sendPasswordCode(Request $request)
-    {
-        $user = Auth::user();
-        $code = rand(100000, 999999);
-
-        try {
-            // 1. Simpan kode ke DB
-            DB::table('password_reset_codes')->updateOrInsert(
-                ['email' => $user->email],
-                ['code' => $code, 'created_at' => now()]
-            );
-
-            // 2. Kirim email
-            // (Jika ini lambat, nanti bisa pakai Queue, tapi sekarang kita pakai langsung)
-            Mail::to($user->email)->send(new SendVerificationCode($code));
-
-            // 3. Return Sukses yang Jelas
+            // 5. Kembalikan Respon Sukses & URL Lengkap
             return response()->json([
                 'success' => true,
-                'message' => 'Kode verifikasi terkirim!'
-            ], 200);
-
-        } catch (\Exception $e) {
-            // Log error untuk debugging
-            \Illuminate\Support\Facades\Log::error("Mail Error: " . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengirim email (Server Error).'
-            ], 500);
+                'message' => 'Foto profil berhasil diperbarui.',
+                'data' => [
+                    // Kita kirim URL lengkap agar Flutter bisa langsung pakai
+                    'url' => asset('storage/' . $path),
+                    'path' => $path
+                ]
+            ]);
         }
+
+        return response()->json(['success' => false, 'message' => 'Gagal mengupload file.'], 400);
     }
 
     /**
-     * 3. API Reset Password dengan Kode
+     * Handle Update Data Profil (Nama & Email)
+     * (Ini untuk fitur Edit Profil yang textfield)
      */
-    public function resetPasswordWithCode(Request $request)
+    public function updateProfile(Request $request)
     {
-        $user = Auth::user();
+        $user = auth()->user();
 
-        $validated = $request->validate([
-            'code' => 'required|string|min:6|max:6',
-            'password' => 'required|string|min:8|confirmed', // 'confirmed' akan cek 'password_confirmation'
+        $validatedData = $request->validate([
+            'full_name' => 'required|string|max:100',
+            // Email harus unik, TAPI abaikan (ignore) ID user yang sedang login saat ini
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->user_id, 'user_id')],
         ]);
 
-        // Cek kodenya
-        $record = DB::table('password_reset_codes')
-            ->where('email', $user->email)
-            ->where('code', $validated['code'])
-            ->first();
+        $user->update($validatedData);
 
-        if (!$record) {
-            return response()->json(['message' => 'Kode verifikasi salah.'], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        // Cek jika kode kadaluarsa (misal: 10 menit)
-        if (now()->diffInMinutes($record->created_at) > 10) {
-            DB::table('password_reset_codes')->where('email', $user->email)->delete();
-            return response()->json(['message' => 'Kode kadaluarsa. Silakan minta kode baru.'], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        // Update password user
-        $user->password_hash = Hash::make($validated['password']);
-        $user->save();
-
-        // Hapus kode
-        DB::table('password_reset_codes')->where('email', $user->email)->delete();
-
-        return response()->json(['message' => 'Password Anda telah berhasil diubah!']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui.',
+            'data' => $user // Kembalikan data user terbaru
+        ]);
     }
 }

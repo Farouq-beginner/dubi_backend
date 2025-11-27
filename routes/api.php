@@ -63,7 +63,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // --- [BARU] RUTE PROFIL PENGGUNA ---
+    // Route untuk upload foto (method POST karena mengirim file)
     Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto']);
+
+    // Route untuk update data teks (nama/email) (method PUT untuk update)
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile']);
+
     Route::post('/profile/send-password-code', [ProfileController::class, 'sendPasswordCode']);
     Route::post('/profile/reset-password-with-code', [ProfileController::class, 'resetPasswordWithCode']);
 

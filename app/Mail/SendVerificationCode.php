@@ -13,19 +13,13 @@ class SendVerificationCode extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $code; // Kode yang akan dikirim
+    public $code;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct($code)
     {
         $this->code = $code;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -33,21 +27,16 @@ class SendVerificationCode extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            text: 'emails.auth.verification_code',
+            view: 'emails.auth.verification_code',
+            with: [
+                'code' => $this->code
+            ]
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

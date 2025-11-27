@@ -73,36 +73,27 @@ Route::get('/image-proxy/{path}', function ($path) {
 // ...existing code...
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', fn(Request $request) => $request->user());
 
-    // --- PROTECTED ---
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/server/session', [ServerController::class, 'checkSession']);
-        Route::post('/auth/logout-others', [ServerController::class, 'logoutOtherDevices']);
-        // ...
-    });
+    // --- SERVER SESSION ---
+    Route::get('/server/session', [ServerController::class, 'checkSession']);
+    Route::post('/auth/logout-others', [ServerController::class, 'logoutOtherDevices']);
 
+    // --- AUTH ---
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // --- [BARU] RUTE PROFIL PENGGUNA ---
-    // Route untuk upload foto (method POST karena mengirim file)
+    // --- PROFILE ---
     Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto']);
-
-    // Route untuk update data teks (nama/email) (method PUT untuk update)
     Route::put('/profile/update', [ProfileController::class, 'updateProfile']);
-
     Route::post('/profile/send-password-code', [ProfileController::class, 'sendPasswordCode']);
     Route::post('/profile/reset-password-with-code', [ProfileController::class, 'resetPasswordWithCode']);
 
-    // --- [BARU] RUTE SEMPOA ---
+    // --- SEMPOA ---
     Route::get('/sempoa/progress', [SempoaController::class, 'getProgress']);
     Route::post('/sempoa/progress', [SempoaController::class, 'saveProgress']);
-    // [BARU] Rute Leaderboard
     Route::get('/sempoa/leaderboard', [SempoaController::class, 'getLeaderboard']);
 
-    // --- Rute Umum & Siswa ---
+    // --- STUDENT ---
     Route::get('/home/my-courses', [HomeController::class, 'myCourses']);
     Route::get('/courses/{course}', [CourseController::class, 'show']);
     Route::get('/quizzes/{quiz}', [QuizController::class, 'show']);

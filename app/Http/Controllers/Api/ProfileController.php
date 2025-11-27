@@ -55,12 +55,88 @@ class ProfileController extends Controller
         return response()->json(['success' => false, 'message' => 'Gagal mengupload file.'], 400);
     }
 
-    /**
-     * Handle Update Data Profil (Nama & Email)
-     * (Ini untuk fitur Edit Profil yang textfield)
+/**
+     * 2. API Kirim Kode Verifikasi Ganti Password
      */
-    public function updateProfile(Request $request)
+    public function sendPasswordCode(Request $request)
     {
+        $user = Auth::user();
+        $code = rand(100000, 999999);
+
+        try {
+            // 1. Simpan kode ke DB
+            DB::table('password_reset_codes')->updateOrInsert(
+                ['email' => $user->email],
+                ['code' => $code, 'created_at' => now()]
+            );
+
+            // 2. Kirim email
+            // (Jika ini lambat, nanti bisa pakai Queue, tapi sekarang kita pakai langsung)
+            Mail::to($user->email)->send(new SendVerificationCode($code));
+
+            // 3. Return Sukses yang Jelas
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode verifikasi terkirim!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            \Illuminate\Support\Facades\Log::error("Mail Error: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email (Server Error).'
+            ], 500);
+        }
+    }
+
+/**
+     * 3. API Reset Password dengan Kode
+     */
+    public function resetPasswordWithCode(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'code' => 'required|string|min:6|max:6',
+            'password' => 'required|string|min:8|confirmed', // 'confirmed' akan cek 'password_confirmation'
+        ]);
+
+        // Cek kodenya
+        $record = \DB::table('password_reset_codes')
+            ->where('email', $user->email)
+            ->where('code', $validated['code'])
+            ->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Kode verifikasi salah.'], 422);
+        }
+
+        // Cek jika kode kadaluarsa (misal: 10 menit)
+        if (now()->diffInMinutes($record->created_at) > 10) {
+            \DB::table('password_reset_codes')->where('email', $user->email)->delete();
+            return response()->json(['message' => 'Kode kadaluarsa. Silakan minta kode baru.'], 422);
+        }
+
+        // Update password
+        $user->password = bcrypt($validated['password']);
+        $user->save();
+
+        // Hapus kode yang sudah dipakai
+        \DB::table('password_reset_codes')->where('email', $user->email)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil direset.'
+        ], 200);
+    }
+
+    /**
+    * Handle Update Data Profil (Nama & Email)
+    * (Ini untuk fitur Edit Profil yang textfield)
+    */
+    public function updateProfile(Request $request) {
         $user = auth()->user();
 
         $validatedData = $request->validate([

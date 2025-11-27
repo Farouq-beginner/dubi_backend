@@ -32,7 +32,7 @@ class UserController extends Controller
         
         $adminId = Auth::id();
         $users = User::where('user_id', '!=', $adminId)
-                    ->with('level') 
+                    ->with('level')
                     ->orderBy('role')
                     ->orderBy('full_name')
                     ->get();
@@ -97,7 +97,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             Log::error("ADMIN DELETE USER FAILED: " . $e->getMessage());
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Gagal menghapus: Pengguna ini mungkin masih memiliki data terkait.'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

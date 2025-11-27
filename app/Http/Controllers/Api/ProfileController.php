@@ -4,8 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // PENTING Untuk handle file
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+
+// WAJIB ditambahkan
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendVerificationCode;
+
 
 class ProfileController extends Controller
 {

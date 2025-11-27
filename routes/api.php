@@ -50,8 +50,32 @@ Route::get('/browse/courses', [BrowseController::class, 'getAllCoursesByLevel'])
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+// [SOLUSI CORS] Rute khusus untuk menyajikan gambar profil lewat PHP
+Route::get('/image-proxy/{path}', function ($path) {
+    // Pastikan path tidak path traversal (keamanan dasar)
+    if (str_contains($path, '..')) {
+        abort(400);
+    }
+
+    // Lokasi file asli di storage
+    // Ingat: di database kita simpan 'profile-photos/namafile.jpg'
+    // Jadi kita gabungkan dengan path storage public
+    $filePath = storage_path('app/public/' . $path);
+
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+
+    // Kembalikan file dengan header yang benar otomatis oleh Laravel
+    return response()->file($filePath);
+})->where('path', '.*'); // Regex agar bisa membaca slash (/) dalam path
+
 // ...existing code...
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 
     // --- PROTECTED ---
     Route::middleware('auth:sanctum')->group(function () {

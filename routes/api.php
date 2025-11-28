@@ -51,24 +51,21 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // [SOLUSI CORS] Rute khusus untuk menyajikan gambar profil lewat PHP
-Route::get('/image-proxy/{path}', function ($path) {
-    // Pastikan path tidak path traversal (keamanan dasar)
-    if (str_contains($path, '..')) {
-        abort(400);
-    }
+Route::get('/image-proxy/{path}', function (Request $request, $path) {
 
-    // Lokasi file asli di storage
-    // Ingat: di database kita simpan 'profile-photos/namafile.jpg'
-    // Jadi kita gabungkan dengan path storage public
-    $filePath = storage_path('app/public/' . $path);
+    $path = strtok($path, '?'); // hapus query parameter
+
+    $safePath = str_replace('..', '', $path);
+
+    $filePath = storage_path("app/public/" . $safePath);
 
     if (!file_exists($filePath)) {
-        abort(404);
+        return response('', 204); // Hilangkan error merah di console
     }
 
-    // Kembalikan file dengan header yang benar otomatis oleh Laravel
     return response()->file($filePath);
-})->where('path', '.*'); // Regex agar bisa membaca slash (/) dalam path
+})->where('path', '.*');
+
 
 // ...existing code...
 Route::middleware('auth:sanctum')->group(function () {
@@ -83,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // --- PROFILE ---
+
     Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto']);
     Route::put('/profile/update', [ProfileController::class, 'updateProfile']);
     Route::post('/profile/send-password-code', [ProfileController::class, 'sendPasswordCode']);

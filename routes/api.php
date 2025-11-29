@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\BrowseController;
 use App\Http\Controllers\Api\SempoaController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ServerController;
+use App\Http\Controllers\Api\NotificationController;
 // --- CONTROLLER GURU ---
 use App\Http\Controllers\Api\Teacher\CourseController as TeacherCourseController;
 use App\Http\Controllers\Api\Teacher\ModuleController as TeacherModuleController;
@@ -78,6 +79,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- AUTH ---
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Notifikasi
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
 
     // --- PROFILE ---
 

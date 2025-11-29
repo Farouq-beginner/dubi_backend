@@ -143,21 +143,36 @@ class ProfileController extends Controller
     * Handle Update Data Profil (Nama & Email)
     * (Ini untuk fitur Edit Profil yang textfield)
     */
-    public function updateProfile(Request $request) {
-        $user = auth()->user();
+/**
+     * Handle Update Data Profil (Nama & Email)
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user(); // Ambil user yang sedang login
 
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'full_name' => 'required|string|max:100',
-            // Email harus unik, TAPI abaikan (ignore) ID user yang sedang login saat ini
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->user_id, 'user_id')],
+            // Email harus unik, kecuali milik user ini sendiri
+            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users')->ignore($user->user_id, 'user_id')],
+            // Level ID opsional, hanya jika user adalah student
+            'level_id' => 'nullable|integer|exists:levels,level_id',
         ]);
 
-        $user->update($validatedData);
+        // Update data
+        $user->full_name = $validated['full_name'];
+        $user->email = $validated['email'];
+        
+        // Jika student, update level_id juga
+        if ($user->role === 'student' && isset($validated['level_id'])) {
+            $user->level_id = $validated['level_id'];
+        }
+
+        $user->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil diperbarui.',
-            'data' => $user // Kembalikan data user terbaru
+            'data' => $user
         ]);
     }
 }

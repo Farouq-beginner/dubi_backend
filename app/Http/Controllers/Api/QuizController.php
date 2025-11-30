@@ -16,9 +16,11 @@ class QuizController extends Controller
 {
     public function show(Quiz $quiz)
     {
-        $quiz->load(['questions.answers' => function ($query) {
-            $query->select('answer_id', 'question_id', 'answer_text');
-        }]);
+        $quiz->load([
+            'questions.answers' => function ($query) {
+                $query->select('answer_id', 'question_id', 'answer_text');
+            }
+        ]);
 
         return response()->json([
             'success' => true,
@@ -73,15 +75,16 @@ class QuizController extends Controller
 
             // 4. Hitung Skor
             $score = ($totalQuestions > 0) ? ($correctAnswersCount / $totalQuestions) * 100 : 0;
-            
+
             // Format skor agar rapi (misal: 85.5)
             $formattedScore = number_format($score, 1);
 
             // 5. Update Attempt
             $attempt->update([
                 'score' => $score,
-                'completed_at' => now(),
+                'completed_at' => $request->completed_at ?? now(),
             ]);
+
 
             // --- [FITUR BARU] BUAT NOTIFIKASI ---
             Notification::create([

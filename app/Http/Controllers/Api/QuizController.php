@@ -93,6 +93,11 @@ class QuizController extends Controller
                 // Gunakan nama kuis yang dinamis dan skor yang diformat
                 'body' => "Selamat! Anda telah menyelesaikan kuis '{$quiz->title}' dengan nilai {$formattedScore}.",
                 'type' => $score >= 70 ? 'success' : 'info', // Hijau jika lulus, Biru jika tidak
+               'extra' => [
+                    'quiz_id' => $quiz->quiz_id,
+                    'attempt_id' => $attempt->attempt_id,
+                    'score' => $score,
+                ],
                 'is_read' => 0
             ]);
             // ------------------------------------

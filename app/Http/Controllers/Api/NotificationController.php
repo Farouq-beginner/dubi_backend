@@ -12,6 +12,11 @@ class NotificationController extends Controller
     // Ambil daftar notifikasi
     public function index()
     {
+        // Tandai semua notifikasi sebagai sudah dibaca saat halaman dibuka
+        Notification::where('user_id', Auth::id())
+                    ->where('is_read', 0)
+                    ->update(['is_read' => 1]);
+
         $notifications = Notification::where('user_id', Auth::id())
                             ->orderBy('created_at', 'desc')
                             ->get();
